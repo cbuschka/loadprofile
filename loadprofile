@@ -1,0 +1,70 @@
+#!/bin/bash
+
+#
+# laodprofile from https://github.com/cbuschka/loadprofile.git
+#
+
+LOADPROFILE_PROFILE_DIR=$HOME/profile
+LOADPROFILE_MIXINS_DIR=$LOADPROFILE_PROFILE_DIR/profile.d/
+
+function loadprofile_logVerbose() {
+  if [ "x${LOADPROFILE_VERBOSE}" != "x" ]; then
+    echo "$@"
+  fi
+}
+
+function loadprofile_linkDotFiles() {
+  for f in $(find $LOADPROFILE_PROFILE_DIR/ -name 'DOT*'); do \
+    tgt=$(basename $f)
+    src=$(echo $tgt | perl -pe 's#DOT#\.#g')
+    if [ -h "$HOME/$src" ] && [ ! -e "$HOME/$src" ]; then \
+      rm $HOME/$src
+    fi
+
+    if [ ! -e "$HOME/$src" ]; then \
+      echo "Linking $tgt..."
+      ln -s $LOADPROFILE_PROFILE_DIR/$tgt $HOME/$src
+    elif [ -L "$HOME/$src" ]; then
+      loadprofile_logVerbose "$HOME/$src is ok."
+    else
+      echo "Would link $tgt, but $HOME/$src is in the way."
+    fi
+  done
+}
+
+function loadprofile_fixPermissions() {
+  chmod 700 $LOADPROFILE_PROFILE_DIR
+  if [ -d "$LOADPROFILE_PROFILE_DIR/DOTssh" ]; then
+    chmod 700 $LOADPROFILE_PROFILE_DIR/DOTssh
+    chmod 600 $LOADPROFILE_PROFILE_DIR/DOTssh/*
+  fi
+}
+
+function loadprofile_loadMixins() {
+  if [ ! -d "$LOADPROFILE_MIXINS_DIR" ]; then
+    return 0
+  fi
+  echo -n "Loading..."
+  for f in $(find $LOADPROFILE_MIXINS_DIR/ -maxdepth 1 -type f); do
+    echo -n " $(basename $f)"
+    source $f 2>/dev/null 1>/dev/null
+    if [ "x0" != "x${?}" ]; then
+      echo -n "!"
+    fi
+  done
+  echo
+  return 0
+}
+
+function loadprofile_main() {
+  if [ ! -d "$LOADPROFILE_PROFILE_DIR" ]; then
+    echo "Profile dir $LOADPROFILE_PROFILE_DIR does not exist."
+    return 1
+  fi
+
+  loadprofile_fixPermissions
+  loadprofile_linkDotFiles
+  loadprofile_loadMixins
+}
+
+loadprofile_main
