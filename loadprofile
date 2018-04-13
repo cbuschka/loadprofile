@@ -12,9 +12,14 @@
 
 LOADPROFILE_PROFILE_DIR=$HOME/profile
 LOADPROFILE_MIXINS_DIR=$LOADPROFILE_PROFILE_DIR/profile.d/
+LOADPROFILERC=$HOME/.loadprofilerc
 
-function loadprofile_logVerbose() {
-  if [ "x${LOADPROFILE_VERBOSE}" != "x" ]; then
+if [ -f "$LOADPROFILERC" ]; then
+  source $LOADPROFILERC
+fi
+
+function loadprofile_echo() {
+  if [ "x${LOADPROFILE_VERBOSE}" = "x1" ]; then
     echo "$@"
   fi
 }
@@ -31,7 +36,7 @@ function loadprofile_linkDotFiles() {
       echo "Linking $tgt..."
       ln -s $LOADPROFILE_PROFILE_DIR/$tgt $HOME/$src
     elif [ -L "$HOME/$src" ]; then
-      loadprofile_logVerbose "$HOME/$src is ok."
+      loadprofile_echo "$HOME/$src is ok."
     else
       echo "Would link $tgt, but $HOME/$src is in the way."
     fi
@@ -50,15 +55,15 @@ function loadprofile_loadMixins() {
   if [ ! -d "$LOADPROFILE_MIXINS_DIR" ]; then
     return 0
   fi
-  echo -n "Loading..."
+  loadprofile_echo -n "Loading..."
   for f in $(find $LOADPROFILE_MIXINS_DIR/ -maxdepth 1 -type f); do
-    echo -n " $(basename $f)"
+    loadprofile_echo -n " $(basename $f)"
     source $f 2>/dev/null 1>/dev/null
     if [ "x0" != "x${?}" ]; then
-      echo -n "!"
+      loadprofile_echo -n "!"
     fi
   done
-  echo
+  loadprofile_echo
   return 0
 }
 
