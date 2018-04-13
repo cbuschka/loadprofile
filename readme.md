@@ -24,7 +24,7 @@ loadprofile supports the following dir tree:
 * Download loadprofile
 ```
 mkdir -p $HOME/bin && \
-curl -o $HOME/bin/loadprofile http://... && \
+curl -o $HOME/bin/loadprofile https://raw.githubusercontent.com/cbuschka/loadprofile/master/loadprofile && \
 chmod +x $HOME/bin/loadprofile
 ```
 
