@@ -1,7 +1,13 @@
 #!/bin/bash
 
 #
-# laodprofile from https://github.com/cbuschka/loadprofile.git
+# loadprofile - a linux profile laoder
+# see: https://github.com/cbuschka/loadprofile.git
+#
+# update with 
+# ```
+# curl https://raw.githubusercontent.com/cbuschka/loadprofile/master/loadprofile -o $HOME/bin/loadprofile
+# ```
 #
 
 LOADPROFILE_PROFILE_DIR=$HOME/profile
