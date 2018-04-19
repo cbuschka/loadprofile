@@ -1,0 +1,5 @@
+# enable logging
+# LOADPROFILE_VERBOSE=1
+
+# add special dirs you want to link from your home into your profile
+# LOADPROFILE_EXTRA_DIRS="bin"

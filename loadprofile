@@ -13,6 +13,7 @@
 LOADPROFILE_PROFILE_DIR=$HOME/profile
 LOADPROFILE_MIXINS_DIR=$LOADPROFILE_PROFILE_DIR/profile.d/
 LOADPROFILERC=$HOME/.loadprofilerc
+LOADPROFILE_EXTRA_DIRS=""
 
 if [ -f "$LOADPROFILERC" ]; then
   source $LOADPROFILERC
@@ -24,22 +25,36 @@ function loadprofile_echo() {
   fi
 }
 
+function loadprofile_createLink() {
+  local tgt=$1
+  local src=$2
+  if [ -h "$HOME/$src" ] && [ ! -e "$HOME/$src" ]; then \
+    rm $HOME/$src
+  fi
+
+  if [ ! -e "$HOME/$src" ]; then \
+    echo "Linking $tgt..."
+    ln -s $LOADPROFILE_PROFILE_DIR/$tgt $HOME/$src
+  elif [ -L "$HOME/$src" ]; then
+    loadprofile_echo "$HOME/$src is ok."
+  else
+    echo "Would link $tgt, but $HOME/$src is in the way."
+  fi
+}
+
+function loadprofile_linkExtraDirs() {
+  for d in ${LOADPROFILE_EXTRA_DIRS}; do
+    src=$(basename "$d")
+    tgt=${LOADPROFILE_PROFILE_DIR}/$d
+    loadprofile_createLink $tgt $src
+  done
+}
+
 function loadprofile_linkDotFiles() {
   for f in $(find $LOADPROFILE_PROFILE_DIR/ -name 'DOT*'); do \
     tgt=$(basename $f)
     src=$(echo $tgt | perl -pe 's#DOT#\.#g')
-    if [ -h "$HOME/$src" ] && [ ! -e "$HOME/$src" ]; then \
-      rm $HOME/$src
-    fi
-
-    if [ ! -e "$HOME/$src" ]; then \
-      echo "Linking $tgt..."
-      ln -s $LOADPROFILE_PROFILE_DIR/$tgt $HOME/$src
-    elif [ -L "$HOME/$src" ]; then
-      loadprofile_echo "$HOME/$src is ok."
-    else
-      echo "Would link $tgt, but $HOME/$src is in the way."
-    fi
+    loadprofile_createLink $tgt $src
   done
 }
 
@@ -75,6 +90,7 @@ function loadprofile_main() {
 
   loadprofile_fixPermissions
   loadprofile_linkDotFiles
+  loadprofile_linkExtraDirs
   loadprofile_loadMixins
 }
 
